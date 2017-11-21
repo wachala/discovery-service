@@ -1,0 +1,30 @@
+sudo: required
+
+language: java
+
+services:
+  - docker
+
+branches:
+  only:
+    - travis
+
+notifications:
+  email: false
+  slack:
+    secure: bXbRfSW/XXXzlFb1bo5R/aDhMOrXMfCimUGdcXrIRLEaTVXO4lPT7iSfyFl9U8NYMkqel8wHoj7xXDGx7PqLqJQjWwLyxMr4+Donhp/HAvEflMWipdOT+FCn/zBaNwD5D3FSMYckOGdf52paFr5rvPrtBCTrLBsA+EtIpzyr9vFzSquai8FsZySr6l2Bf6KHemYmSxOIWdhPBtWW/G835EWcUmKK40TjQ10iYhbRDMu9MC8tJ8+froQxK5TyTWG/bJuvxaDolpxX/v33bmsoiW9eSmEFZVBAchkSxGti8ZTipxgUEaidxwHgCA+yYDy7qkmH7zElikmlONr5+U4t4blgxP01GI9L5YfTAS0EcmyX4UVKimXARYv174lWGVk6lo2dPwh8sJUuMES2UziGbpbyeWyIpy9+KIiWwPDXkLajTlE+P16oTjOHsUNwvneCmCbW+5ObD/8ib9zjpfAfYza9ScYbXQpOfOncH6NRjkv+ro1++tA9B6Q/Tl0Cn0dyo+rtu1lBkj2nu/PTyaSPLjqOybSFg/RXVkAL4bIYjVZLF6alH2AKabLKDvglMGAuLd9MSv1BUeztQLEpFxy057xE6Ue3cm2wWtLzI65ij+pZCE3ojodaOi5BOT4y9VA+jJaD9I4Hl71HE5RZrDfOAzMWp6MmUc5e2HMNFY7QVoc=
+
+before_install:
+  - mvn clean package
+  - docker build -t patrykks/iosr-discovery-service .
+  - docker run --name eureka -d patrykks/iosr-discovery-service
+
+script:
+  - docker ps | grep -q eureka
+  - docker exec eureka mvn -f /webapp/discovery-service/pom.xml test
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "travis" ]; then
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker push patrykks/iosr-discovery-service;
+    fi

@@ -1,4 +1,4 @@
-FROM java:openjdk-8-jre
-CMD java -jar discovery-service-1.0-SNAPSHOT.jar
+FROM maven:3-jdk-8-slim
+CMD java -jar /webapp/discovery-service/target/discovery-service-1.0-SNAPSHOT.jar
 EXPOSE 8761
-COPY target/discovery-service-1.0-SNAPSHOT.jar .
+COPY ./ /webapp/discovery-service
